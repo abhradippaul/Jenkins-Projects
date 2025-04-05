@@ -1,5 +1,5 @@
 pipeline {
-
+    @Library("Shared") _
     agent {
         docker {
             image 'abhishekf5/maven-abhishek-docker-agent:v1'
