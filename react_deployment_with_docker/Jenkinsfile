@@ -1,66 +1,68 @@
 pipeline {
     agent any
 
-    stage('Pulling from GitHub') {
-            steps {
-                echo "GitHub code pulling started"
-                git url: "https://github.com/abhradippaul/simple-react-app.git", 
-                credentialsId: "github-jenkins", 
-                branch: "main"
-                echo "GitHub code pulling completed"
-                
-            }
-        }
-        
-        stage('Building Image and Removing All Containers') {
-            parallel {
-                stage("Building Image") {
-                    steps {
-                        echo "Docker building image started"
-                        sh "docker build -t frontend -f Dockerfile2 ."
-                        echo "Docker builing image completed"
-                    }
-                }
-                stage("Removing All Containers") {
-                    echo "Removing all docker container started"
-                    sh 'for id in $(docker ps -aq); do docker rm --force $id; done'
-                    echo "Removing all docker container completed"
+    stages {
+            stage('Pulling from GitHub') {
+                steps {
+                    echo "GitHub code pulling started"
+                    git url: "https://github.com/abhradippaul/simple-react-app.git", 
+                    credentialsId: "github-jenkins", 
+                    branch: "main"
+                    echo "GitHub code pulling completed"
+                    
                 }
             }
-        }
-        stage('Pushing to DockerHub and Test Container') {
-            parallel {
-                stage("Pushing to DockerHub") {
-                    steps {
-                        withCredentials([
-                        usernamePassword(credentialsId: "dockerhub-jenkins",
-                        usernameVariable: "username", 
-                        passwordVariable: "password")]) {
-                            echo "Docker login started"
-                            sh "docker login -u $username -p $password"
-                            sh "docker tag frontend $username/frontend"
-                            sh "docker push $username/frontend"
-                            echo "Docker login completed"
+            
+            stage('Building Image and Removing All Containers') {
+                parallel {
+                    stage("Building Image") {
+                        steps {
+                            echo "Docker building image started"
+                            sh "docker build -t frontend -f Dockerfile2 ."
+                            echo "Docker builing image completed"
                         }
                     }
+                    stage("Removing All Containers") {
+                        echo "Removing all docker container started"
+                        sh 'for id in $(docker ps -aq); do docker rm --force $id; done'
+                        echo "Removing all docker container completed"
+                    }
                 }
-                 stage('Test Container') {
-                    steps {
-                        echo "Testing container started"
-                        sh "docker run -d --name frontend-container -p 80:80 frontend"
-                        sh "curl localhost > output.txt; date >> output.txt"
-                        echo "Testing container finished"
+            }
+            stage('Pushing to DockerHub and Test Container') {
+                parallel {
+                    stage("Pushing to DockerHub") {
+                        steps {
+                            withCredentials([
+                            usernamePassword(credentialsId: "dockerhub-jenkins",
+                            usernameVariable: "username", 
+                            passwordVariable: "password")]) {
+                                echo "Docker login started"
+                                sh "docker login -u $username -p $password"
+                                sh "docker tag frontend $username/frontend"
+                                sh "docker push $username/frontend"
+                                echo "Docker login completed"
+                            }
+                        }
+                    }
+                    stage('Test Container') {
+                        steps {
+                            echo "Testing container started"
+                            sh "docker run -d --name frontend-container -p 80:80 frontend"
+                            sh "curl localhost > output.txt; date >> output.txt"
+                            echo "Testing container finished"
+                    }
                 }
+                    
             }
                 
         }
             
-    }
-        
-         stage('Deploy') {
-            steps {
-                echo 'This is deploy stage'
+            stage('Deploy') {
+                steps {
+                    echo 'This is deploy stage'
+                }
             }
-        }
         
     }
+}
