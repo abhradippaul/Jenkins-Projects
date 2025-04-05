@@ -3,11 +3,15 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "frontend"
+    }
+
     stages {
 
         stage('Pulling from GitHub') {
                 steps {
-                    script{
+                    script {
                         github_clone(
                         "https://github.com/abhradippaul/simple-react-app.git", 
                         "main",
@@ -21,16 +25,16 @@ pipeline {
                 parallel {
                     stage("Building Image") {
                         steps {
-                            echo "Docker building image started"
-                            sh "docker build -t frontend -f Dockerfile2 ."
-                            echo "Docker builing image completed"
+                            script {
+                                building_image_docker("${IMAGE_NAME}", "Dockerfile2")
+                            }
                         }
                     }
                     stage("Removing All Containers") {
                         steps{
-                            echo "Removing all docker container started"
-                            sh 'for id in $(docker ps -aq); do docker rm --force $id; done'
-                            echo "Removing all docker container completed"
+                            script {
+                                removing_existing_containers()
+                            }
                         }
                     }
                 }
@@ -39,24 +43,16 @@ pipeline {
                 parallel {
                     stage("Pushing to DockerHub") {
                         steps {
-                            withCredentials([
-                            usernamePassword(credentialsId: "dockerhub-jenkins",
-                            usernameVariable: "username", 
-                            passwordVariable: "password")]) {
-                                echo "Docker login started"
-                                sh "docker login -u $username -p $password"
-                                sh "docker tag frontend $username/frontend"
-                                sh "docker push $username/frontend"
-                                echo "Docker login completed"
+                            script {
+                                pushing_dockerhub("dockerhub-jenkins")
                             }
                         }
                     }
                     stage('Test Container') {
                         steps {
-                            echo "Testing container started"
-                            sh "docker run -d --name frontend-container -p 80:80 frontend"
-                            sh "curl localhost > output.txt; date >> output.txt"
-                            echo "Testing container finished"
+                            script {
+                                test_container("frontend-container", "${IMAGE_NAME}")
+                            }
                     }
                 }
                     
