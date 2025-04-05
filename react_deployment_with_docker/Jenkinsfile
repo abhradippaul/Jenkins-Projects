@@ -8,7 +8,7 @@ pipeline {
         stage('Pulling from GitHub') {
                 steps {
                     script{
-                        github_clone()
+                        github_clone("https://github.com/abhradippaul/simple-react-app.git", "github-jenkins", "main")
                     }
                 }
             }
