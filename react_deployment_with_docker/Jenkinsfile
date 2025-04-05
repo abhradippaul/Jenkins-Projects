@@ -5,21 +5,11 @@ pipeline {
 
     stages {
 
-        stage("Hello") {
-            steps{
-                script{
-                    hello()
-                }
-            }
-        }
-            stage('Pulling from GitHub') {
+        stage('Pulling from GitHub') {
                 steps {
-                    echo "GitHub code pulling started"
-                    git url: "https://github.com/abhradippaul/simple-react-app.git", 
-                    credentialsId: "github-jenkins", 
-                    branch: "main"
-                    echo "GitHub code pulling completed"
-                    
+                    script{
+                        github_clone()
+                    }
                 }
             }
             
