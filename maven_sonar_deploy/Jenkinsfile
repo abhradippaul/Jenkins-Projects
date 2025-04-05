@@ -1,10 +1,19 @@
 pipeline {
-    agent any
+
+    agent {
+        docker {
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
-        stage('Hello') {
+        stage('Checkout') {
             steps {
-                echo 'Hello World'
+                script {
+                    github_clone(
+                        "https://github.com/abhradippaul/Jenkins-Zero-To-Hero.git", "main", "")
+                }
             }
         }
     }
