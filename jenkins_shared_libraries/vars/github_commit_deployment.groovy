@@ -11,7 +11,7 @@ def call(String branch, String credentialsId, String BUILD_NUMBER, String repo) 
         git config user.password "${password}"
         # git checkout maven_sonar_deploy
         # sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" maven_sonar_deploy/manifests/deployment.yaml
-        cat maven_sonar_deploy/manifests/deployment.yaml
+        # cat maven_sonar_deploy/manifests/deployment.yaml
         # git add maven_sonar_deploy
         # git commit -m "Update deployment image to version ${BUILD_NUMBER}"
         git remote -v
