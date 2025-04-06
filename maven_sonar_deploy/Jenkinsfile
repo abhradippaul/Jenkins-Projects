@@ -59,7 +59,7 @@ pipeline {
             steps {
                 script {
                     github_commit_deployment(
-                        "jenkins_shared_libraries", 
+                        "maven_sonar_deploy", 
                         "github-jenkins", 
                         "${params.BUILD_NUMBER}", 
                         "Jenkins-Projects")
