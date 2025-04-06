@@ -11,7 +11,9 @@ pipeline {
     environment {
         SONAR_URL = "http://34.31.217.109:9000"
         LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
-        DOCKER_IMAGE= "maven-cicd"
+        DOCKER_IMAGE = "maven-cicd"
+        GITHUB_REPO_NAME = "Jenkins-Projects"
+        GITHUB_USER_NAME = "abhradippaul"
     }
 
     stages {
@@ -51,6 +53,17 @@ pipeline {
                         sh "docker push \
                         ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
                     }
+            }
+        }
+        stage("Update Deployment File") {
+            steps {
+                script {
+                    github_commit_deployment(
+                        "jenkins_shared_libraries", 
+                        "github-jenkins", 
+                        "${params.BUILD_NUMBER}", 
+                        "Jenkins-Projects")
+                }
             }
         }
     }
