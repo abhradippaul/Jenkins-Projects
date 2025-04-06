@@ -13,7 +13,10 @@ def call(String branch, String credentialsId, String BUILD_NUMBER, String repo) 
         sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" maven_sonar_deploy/manifests/deployment.yaml
         git add maven_sonar_deploy
         git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-        git push origin maven_sonar_deploy
+        git remote -v
+        git branch
+        git log --oneline
+        # git push origin maven_sonar_deploy
         '''
     }
 }
