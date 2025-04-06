@@ -5,11 +5,11 @@ def call(String branch, String credentialsId, String BUILD_NUMBER, String repo) 
         usernameVariable: "username", 
         passwordVariable: "password"
         )]){
+        git url: "https://github.com/abhradippaul/Jenkins-Projects.git", branch: "maven_sonar_deploy"
         sh '''
         git config user.email "abhradipserampore@gmail.com"
         git config user.name "${username}"
         git config user.password "${password}"
-        git url: "https://github.com/abhradippaul/Jenkins-Projects.git", branch: "maven_sonar_deploy"
         ls
         # git checkout maven_sonar_deploy
         # sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" maven_sonar_deploy/manifests/deployment.yaml
