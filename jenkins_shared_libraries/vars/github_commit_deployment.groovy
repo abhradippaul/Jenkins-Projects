@@ -14,10 +14,9 @@ def call(String branch, String credentialsId, String BUILD_NUMBER, String repo) 
         git log --oneline 
         git status
         git remote -v
-        # git checkout maven_sonar_deploy
-        # sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" maven_sonar_deploy/manifests/deployment.yaml
-        # cat maven_sonar_deploy/manifests/deployment.yaml
-        # git add maven_sonar_deploy
+        sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" manifests/deployment.yaml
+        cat manifests/deployment.yaml
+        # git add manifests/deployment.yaml
         # git commit -m "Update deployment image to version ${BUILD_NUMBER}"
         # git remote -v
         # git branch
