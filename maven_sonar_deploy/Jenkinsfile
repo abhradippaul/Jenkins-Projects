@@ -46,7 +46,7 @@ pipeline {
                     passwordVariable: "password")]) {
                         sh "docker login -u ${username} -p ${password}"
                         sh "cd ${LOCATION} && \
-                        docker build -t ${username}/${DOCKER_IMAGE}"
+                        docker build -t ${username}/${DOCKER_IMAGE} ."
                         sh "docker push ${username}/${DOCKER_IMAGE}"
                     }
             }
