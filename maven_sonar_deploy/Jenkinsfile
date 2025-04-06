@@ -47,9 +47,9 @@ pipeline {
                         sh "docker login -u ${username} -p ${password}"
                         sh "cd ${LOCATION} && \
                         docker build -t \
-                        ${username}/${DOCKER_IMAGE}:${param.BUILD_NUMBER} ."
+                        ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER} ."
                         sh "docker push \
-                        ${username}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                        ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
                     }
             }
         }
