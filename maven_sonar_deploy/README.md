@@ -34,6 +34,9 @@ This pipeline implements continuous integration and GitOps-based continuous depl
 - Jenkins is triggered either via webhook or polling.
 - It uses a **Docker agent** to create an isolated build environment.
 
+![Screenshot 2025-04-09 214314](https://github.com/user-attachments/assets/91ef1308-76e9-48ce-9afd-828a5c906284)
+
+
 ### 3. 🧱 Build with Maven
 - Jenkins compiles the Java source code.
 - Generates a `.jar` file using Maven.
@@ -47,19 +50,29 @@ This pipeline implements continuous integration and GitOps-based continuous depl
   - Test coverage
 - If the **quality gate fails**, the pipeline stops.
 
+![Screenshot 2025-04-09 214635](https://github.com/user-attachments/assets/5ae9557c-79ff-4ac2-bdc7-53ed5367bb4b)
+
+
 ### 5. 🐳 Build Docker Image
 - Jenkins builds a Docker image of the application.
 - Tags the image with the build number or Git commit SHA.
 - Pushes it to **Docker Hub**.
 
+![Screenshot 2025-04-09 214555](https://github.com/user-attachments/assets/61876d4d-e347-40d4-b11e-7e149217c57b)
+
+
 ### 6. 📝 Update Deployment YAML
 - Jenkins updates the Kubernetes deployment YAML file with the **new Docker image tag**.
 - Commits and pushes the updated YAML back to **GitHub**.
+
+![Screenshot 2025-04-09 214709](https://github.com/user-attachments/assets/06e6fafb-4c11-49a7-8355-d8c8643882ff)
 
 ### 7. 🔄 ArgoCD Sync
 - ArgoCD monitors the GitHub repository.
 - Detects changes to the deployment manifest.
 - Applies the updated YAML to the **Kubernetes cluster** automatically.
+
+![Screenshot 2025-04-09 220934](https://github.com/user-attachments/assets/aa05dd66-e3f5-4c57-8137-7bcceb66407b)
 
 ---
 
@@ -85,15 +98,16 @@ This pipeline implements continuous integration and GitOps-based continuous depl
 
 🤖 Automated GitOps delivery using ArgoCD
 
+![Screenshot 2025-04-09 215033](https://github.com/user-attachments/assets/67145658-9831-4433-8bd7-65df88f2d4c6)
+![Screenshot 2025-04-09 215050](https://github.com/user-attachments/assets/b5f91899-17d6-4af9-9a39-b9a3bc8f4180)
+
+
 📺 ArgoCD Dashboard
 You can monitor your application’s state in real-time using the ArgoCD web interface. It provides features such as:
 
 Application status
-
 Sync status
-
 Rollback options
-
 Deployment history
 
 
