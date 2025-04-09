@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     maven_sonar_test(
-                    "sonar-scanner", 
+                    "sonar-token", 
                     "${LOCATION}", 
                     "${SONAR_URL}")
                 }
