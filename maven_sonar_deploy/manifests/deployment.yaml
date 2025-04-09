@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: abhradippaul/maven-cicd:v1
+        image: abhradippaul/maven-cicd:v10
         ports:
         - containerPort: 8080
