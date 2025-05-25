@@ -20,6 +20,8 @@ This project demonstrates a complete CI/CD workflow using Jenkins, Maven, SonarQ
 
 GitHub → Jenkins → Maven → SonarQube → Docker Hub → GitHub (YAML) → ArgoCD → Kubernetes
 
+![diagram-export-25-05-2025-13_32_52](https://github.com/user-attachments/assets/df623c6b-7775-47b8-8fca-345ffcefeb5a)
+
 
 This pipeline implements continuous integration and GitOps-based continuous deployment.
 
