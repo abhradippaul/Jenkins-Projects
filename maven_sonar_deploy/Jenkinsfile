@@ -1,0 +1,71 @@
+@Library("Shared") _
+
+pipeline {
+    agent {
+        docker {
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+
+    environment {
+        SONAR_URL = "http://35.238.42.194:9000"
+        LOCATION = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
+        DOCKER_IMAGE = "maven-cicd"
+        GITHUB_REPO_NAME = "Jenkins-Projects"
+        GITHUB_USER_NAME = "abhradippaul"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    github_clone(
+                        "https://github.com/abhradippaul/Jenkins-Zero-To-Hero.git", "main", "")
+                }
+            }
+        }
+        stage('Build and Test') {
+            steps {
+                sh "cd ${LOCATION} && mvn clean package"
+            }
+        }
+        stage('Static Code Analysis') {
+            steps {
+                script {
+                    maven_sonar_test(
+                    "sonar-token", 
+                    "${LOCATION}", 
+                    "${SONAR_URL}")
+                }
+            }
+        }
+        stage("Build and Push Docker Image") {
+            steps {
+                withCredentials([
+                    usernamePassword(credentialsId: "dockerhub-jenkins",
+                    usernameVariable: "username", 
+                    passwordVariable: "password")]) {
+                        sh "docker login -u ${username} -p ${password}"
+                        sh "cd ${LOCATION} && \
+                        docker build -t \
+                        ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER} ."
+                        sh "docker push \
+                        ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
+                    }
+            }
+        }
+        
+        stage("Update Deployment File") {
+            steps {
+                script {
+                    github_commit_deployment(
+                        "maven_sonar_deploy", 
+                        "github-jenkins", 
+                        "${params.BUILD_NUMBER}", 
+                        "Jenkins-Projects")
+                }
+            }
+        }
+    }
+}
