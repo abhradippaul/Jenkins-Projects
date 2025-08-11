@@ -1,0 +1,70 @@
+@Library("Shared") _
+
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "frontend"
+    }
+
+    stages {
+
+        stage('Pulling from GitHub') {
+                steps {
+                    script {
+                        github_clone(
+                        "https://github.com/abhradippaul/simple-react-app.git", 
+                        "main",
+                        "github-jenkins"
+                        )
+                    }
+                }
+            }
+            
+            stage('Building Image and Removing All Containers') {
+                parallel {
+                    stage("Building Image") {
+                        steps {
+                            script {
+                                building_image_docker("${IMAGE_NAME}", "Dockerfile2")
+                            }
+                        }
+                    }
+                    stage("Removing All Containers") {
+                        steps{
+                            script {
+                                removing_existing_containers()
+                            }
+                        }
+                    }
+                }
+            }
+            stage('Pushing to DockerHub and Test Container') {
+                parallel {
+                    stage("Pushing to DockerHub") {
+                        steps {
+                            script {
+                                pushing_dockerhub("dockerhub-jenkins")
+                            }
+                        }
+                    }
+                    stage('Test Container') {
+                        steps {
+                            script {
+                                test_container("frontend-container", "${IMAGE_NAME}")
+                            }
+                    }
+                }
+                    
+            }
+                
+        }
+            
+            stage('Deploy') {
+                steps {
+                    echo 'This is deploy stage'
+                }
+            }
+        
+    }
+}
