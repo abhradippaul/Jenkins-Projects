@@ -1,0 +1,3 @@
+def call(){
+    echo "Hello testing jenkins shared libraries with another branch."
+}
