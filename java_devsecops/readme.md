@@ -1,0 +1,1 @@
+Jenkins Plugins -> Eclipse Temurin installer, Config File Provider , Pipeline Maven Integration , Pipeline Maven Plugin API, SonarQube Scanner, Docker, Docker Pipeline, Kubernetes, Kubernetes Client API, Kubernetes Credentials, Kubernetes CLI
