@@ -8,6 +8,7 @@ pipeline {
     
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_IMAGE = 'maven-devsecops'
     }
 
     stages {
@@ -31,7 +32,7 @@ pipeline {
         }
         stage('File System Scan') {
             steps {
-                sh "docker run --rm -v /data/trivy/fs:/data -v /var/run/docker.sock:/var/run/docker.sock -v ~/.cache:/root/.cache --name trivy alpine/trivy:latest fs --format table -o /data/BoardGame.html ."
+                sh "docker run --rm -v /data/trivy/fs:/data -v /var/run/docker.sock:/var/run/docker.sock -v ~/.cache:/root/.cache --name trivy aquasec/trivy fs --format table -o /data/BoardGame.html ."
                 echo 'File System Scan Completed'
             }
         }
@@ -53,7 +54,8 @@ pipeline {
                     def qg = waitForQualityGate()
                     if (qg.status != 'OK') {
                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        echo "Quality gate passed successfully" }
+                    }
+                    echo "Quality gate passed successfully"
                 }
             }
         }
@@ -61,6 +63,7 @@ pipeline {
         stage("Build") {
             steps {
                 sh "mvn package"
+                echo "Maven build successfully"
             }
         }
         
@@ -76,7 +79,7 @@ pipeline {
         stage('Login to DockerHub and Build Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-docker', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker build -t ${username}/devsecops-maven ."
+                    sh "docker build -t ${username}/${DOCKER_IMAGE} ."
                     sh "docker login -u ${username} -p ${password}"
                 }
                 echo "Docker Image build and Docker Hub login completed."
@@ -86,7 +89,7 @@ pipeline {
         stage('Scan Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-docker', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker run --rm -v /data/trivy/image:/data --name trivy bitnami/trivy:latest image --format json --output /data/BoardGame.json ${username}/devsecops-maven"
+                    sh "docker run --rm -v /data/trivy/image:/data -v /var/run/docker.sock:/var/run/docker.sock -v ~/.cache:/root/.cache --name trivy aquasec/trivy image --format json --output /data/BoardGame.json ${username}/${DOCKER_IMAGE}"
                 }
                 echo "Scan Docker Image completed."
             }
@@ -95,16 +98,26 @@ pipeline {
         stage('Publish to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-docker', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker push ${username}/devsecops-maven"
+                    sh "docker push ${username}/${DOCKER_IMAGE}"
                 }
                 echo "Publish to Docker Hub is completed."
             }
         }
         
+        // stage('Kubernetes Deployment') {
+        //     steps {
+        //         kubeconfig(credentialsId: 'k8s', serverUrl: 'http://localhost:6443') {
+        //             sh "kubectl get nodes"
+        //         }
+        //         echo "Kubernetes Deployment is completed"
+        //     }
+        // }
+
+
         stage('Kubernetes Deployment') {
             steps {
-                withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: 'kubernetes-admin@kubernetes', credentialsId: 'jenkins-k8s', namespace: 'jenkins-cicd', restrictKubeConfigAccess: false, serverUrl: 'http://localhost:6443') {
-                    sh "kubectl get pods"
+                withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: 'kubernetes-admin@kubernetes', credentialsId: 'k8s', namespace: 'jenkins-ns', restrictKubeConfigAccess: false, serverUrl: 'http://localhost:6443') {
+                    sh "kubectl apply -f deployment-service.yaml"
                 }
                 echo "Kubernetes Deployment is completed"
             }
