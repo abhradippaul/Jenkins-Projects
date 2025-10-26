@@ -4,7 +4,7 @@ replicaCount: 2
 image:
   repository: abhradippaul/maven-devsecops
   pullPolicy: Always
-  tag: v2
+  tag: v1
 
 serviceAccount:
   create: false
