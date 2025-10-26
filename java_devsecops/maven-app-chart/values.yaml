@@ -1,0 +1,33 @@
+
+replicaCount: 2
+
+image:
+  repository: abhradippaul/maven-devsecops
+  pullPolicy: Always
+  tag: ""
+
+serviceAccount:
+  create: false
+
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 30001
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+resources: 
+  limits:
+    cpu: 150m
+    memory: 400Mi
+  requests:
+    cpu: 150m
+    memory: 400Mi
+
+autoscaling:
+  enabled: false
+

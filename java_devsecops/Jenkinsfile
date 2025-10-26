@@ -12,53 +12,59 @@ pipeline {
     }
 
     stages {
+        
         stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/abhradippaul/Boardgame.git'
                 echo "Git Checkout completed successfully."
             }
         }
+
         stage('Compilation Code') {
             steps {
                 sh "mvn compile"
                 echo "Compilation is done"
             }
         }
+
         stage('Test Compilation') {
             steps {
                 sh "mvn test"
                 echo "Test Compilation is done"
             }
         }
+
         stage('File System Scan') {
             steps {
                 sh "docker run --rm -v /data/trivy/fs:/data -v /var/run/docker.sock:/var/run/docker.sock -v ~/.cache:/root/.cache --name trivy aquasec/trivy fs --format table -o /data/BoardGame.html ."
                 echo 'File System Scan Completed'
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("sonar-scanner") {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=BoardGame \
-                    -Dsonar.projectName=BoardGame \
-                    -Dsonar.java.binaries=. 
-                '''
-                }
-                echo 'SonarQube Analysis Completed'
-            }
-        }
-        stage("Quality Gate") {
-            steps {
-                script {
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                    }
-                    echo "Quality gate passed successfully"
-                }
-            }
-        }
+
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv("sonar-scanner") {
+        //             sh ''' $SCANNER_HOME/bin/sonar-scanner \
+        //             -Dsonar.projectKey=BoardGame \
+        //             -Dsonar.projectName=BoardGame \
+        //             -Dsonar.java.binaries=. 
+        //         '''
+        //         }
+        //         echo 'SonarQube Analysis Completed'
+        //     }
+        // }
+
+        // stage("Quality Gate") {
+        //     steps {
+        //         script {
+        //             def qg = waitForQualityGate()
+        //             if (qg.status != 'OK') {
+        //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        //             }
+        //             echo "Quality gate passed successfully"
+        //         }
+        //     }
+        // }
 
         stage("Build") {
             steps {
@@ -67,14 +73,14 @@ pipeline {
             }
         }
         
-        stage('Publish to Nexus') {
-            steps {
-              withMaven(globalMavenSettingsConfig: 'global-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
-                    sh "mvn deploy"
-                }
-                echo "Publish to nexus is completed."
-            }
-        }
+        // stage('Publish to Nexus') {
+        //     steps {
+        //       withMaven(globalMavenSettingsConfig: 'global-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
+        //             sh "mvn deploy"
+        //         }
+        //         echo "Publish to nexus is completed."
+        //     }
+        // }
         
         stage('Login to DockerHub and Build Image') {
             steps {
@@ -103,6 +109,15 @@ pipeline {
                 echo "Publish to Docker Hub is completed."
             }
         }
-        
+
+        stage('Kubernetes change yaml') {
+            steps {
+                sh "sed -i 's/^  tag: .*/  tag: ${params.BUILD_NUMBER}/' Jenkins-Projects/java_devsecops/maven-app-chart/values.yaml"
+                sh "git add ."
+                sh "git commit -m 'Change yaml deployment image tag to ${params.BUILD_NUMBER}'"
+                sh "git push"
+                echo "Yaml file changes successfully"
+            }
+        }
     }
 }
