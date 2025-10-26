@@ -12,7 +12,7 @@ pipeline {
     }
 
     stages {
-        
+
         stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/abhradippaul/Boardgame.git'
@@ -110,12 +110,21 @@ pipeline {
             }
         }
 
-        stage('Kubernetes change yaml') {
+        stage('Git Checkout for kubernetes-file') {
             steps {
-                sh "sed -i 's/^  tag: .*/  tag: ${params.BUILD_NUMBER}/' Jenkins-Projects/java_devsecops/maven-app-chart/values.yaml"
-                sh "git add ."
+                git branch: 'main', url: 'https://github.com/abhradippaul/Jenkins-Projects.git'
+                echo "Git Checkout completed successfully."
+            }
+        }
+
+        stage('Push changeed yaml') {
+            steps {
+                sh "sed -i 's/^  tag: .*/  tag: ${params.BUILD_NUMBER}/' java_devsecops/maven-app-chart/values.yaml"
+                sh "git add java_devsecops/maven-app-chart/values.yaml"
                 sh "git commit -m 'Change yaml deployment image tag to ${params.BUILD_NUMBER}'"
-                sh "git push"
+                withCredentials([gitUsernamePassword(credentialsId: 'your-git-credentials-id', gitToolName: 'Default')]){
+                    sh "git push --set-upstream origin main"
+                }
                 echo "Yaml file changes successfully"
             }
         }
