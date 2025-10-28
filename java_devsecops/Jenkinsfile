@@ -41,30 +41,30 @@ pipeline {
             }
         }
 
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv("sonar-scanner") {
-        //             sh ''' $SCANNER_HOME/bin/sonar-scanner \
-        //             -Dsonar.projectKey=BoardGame \
-        //             -Dsonar.projectName=BoardGame \
-        //             -Dsonar.java.binaries=. 
-        //         '''
-        //         }
-        //         echo 'SonarQube Analysis Completed'
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("sonar-scanner") {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectKey=BoardGame \
+                    -Dsonar.projectName=BoardGame \
+                    -Dsonar.java.binaries=. 
+                '''
+                }
+                echo 'SonarQube Analysis Completed'
+            }
+        }
 
-        // stage("Quality Gate") {
-        //     steps {
-        //         script {
-        //             def qg = waitForQualityGate()
-        //             if (qg.status != 'OK') {
-        //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
-        //             }
-        //             echo "Quality gate passed successfully"
-        //         }
-        //     }
-        // }
+        stage("Quality Gate") {
+            steps {
+                script {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                    }
+                    echo "Quality gate passed successfully"
+                }
+            }
+        }
 
         stage("Build") {
             steps {
@@ -73,14 +73,14 @@ pipeline {
             }
         }
         
-        // stage('Publish to Nexus') {
-        //     steps {
-        //       withMaven(globalMavenSettingsConfig: 'global-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
-        //             sh "mvn deploy"
-        //         }
-        //         echo "Publish to nexus is completed."
-        //     }
-        // }
+        stage('Publish to Nexus') {
+            steps {
+              withMaven(globalMavenSettingsConfig: 'global-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
+                    sh "mvn deploy"
+                }
+                echo "Publish to nexus is completed."
+            }
+        }
         
         stage('Login to DockerHub and Build Image') {
             steps {

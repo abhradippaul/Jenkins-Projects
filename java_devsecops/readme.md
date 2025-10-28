@@ -56,7 +56,7 @@ Before running the pipeline, ensure the following setups are complete:
 
 ```bash
 # Run the docker container
-docker run -it --rm -e NGROK_AUTHTOKEN=<token> http 8080 --url <url>
+docker run -it --rm -e NGROK_AUTHTOKEN=<token> ngrok/ngrok http <server-url>:8080 --url <url>
 ```
 
 Ngrok container will be used to expose local jenkins to use for webhook.
