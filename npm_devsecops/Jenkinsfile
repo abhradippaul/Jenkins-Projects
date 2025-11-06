@@ -1,0 +1,17 @@
+pipeline {
+    agent none
+
+    stages {
+        stage('Hello') {
+            agent {
+                docker {
+                    image 'busybox'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
