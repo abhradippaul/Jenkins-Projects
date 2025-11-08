@@ -16,11 +16,30 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
 
-  sonarqube:
-    image: sonarqube
+  node-exporter:
+    image: prom/node-exporter
+    command:
+      - "--path.rootfs=/host"
     ports:
-      - "9000:9000"
+      - "9100:9100"
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prom.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
 volumes:
   jenkins_home:
     driver: local
+  grafana_data:

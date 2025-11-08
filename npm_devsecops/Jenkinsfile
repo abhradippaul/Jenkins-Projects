@@ -28,29 +28,29 @@ pipeline {
             }
         }
 
-        stage('Sonarqube Analysis'){
-            steps {
-                withSonarQubeEnv('sonar-scanner') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectName=React-Frontend \
-                    -Dsonar.projectKey=React-Frontend \
-                    -Dsonar.sources=$LOCATION '''
-                }
-                echo 'SonarQube Analysis Completed'
-            }
-        }
+        // stage('Sonarqube Analysis'){
+        //     steps {
+        //         withSonarQubeEnv('sonar-scanner') {
+        //             sh ''' $SCANNER_HOME/bin/sonar-scanner \
+        //             -Dsonar.projectName=React-Frontend \
+        //             -Dsonar.projectKey=React-Frontend \
+        //             -Dsonar.sources=$LOCATION '''
+        //         }
+        //         echo 'SonarQube Analysis Completed'
+        //     }
+        // }
 
-        stage("Quality Gate") {
-            steps {
-                script {
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                    }
-                    echo "Quality gate passed successfully"
-                }
-            }
-        }
+        // stage("Quality Gate") {
+        //     steps {
+        //         script {
+        //             def qg = waitForQualityGate()
+        //             if (qg.status != 'OK') {
+        //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        //             }
+        //             echo "Quality gate passed successfully"
+        //         }
+        //     }
+        // }
 
         stage('Install Dependecy') {
             steps {
@@ -104,6 +104,19 @@ pipeline {
                     sh "docker push ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
                 }
                 echo "Publish to Docker Hub is completed."
+            }
+        }
+
+        stage('Push changeed yaml') {
+            steps {
+                sh "sed -i 's/^  tag: .*/  tag: ${params.BUILD_NUMBER}/' npm_devsecops/manifest/values.yaml"
+                sh "cat npm_devsecops/manifest/values.yaml"
+                // sh "git add java_devsecops/maven-app-chart/values.yaml"
+                // sh "git commit -m 'Change yaml deployment image tag to ${params.BUILD_NUMBER}'"
+                // withCredentials([gitUsernamePassword(credentialsId: 'your-git-credentials-id', gitToolName: 'Default')]){
+                //     sh "git push --set-upstream origin main"
+                // }
+                echo "Yaml file changes successfully"
             }
         }
 

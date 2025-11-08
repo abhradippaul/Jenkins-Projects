@@ -1,0 +1,42 @@
+replicaCount: 2
+
+image:
+  repository: abhradippaul/devsecops
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+
+serviceAccount:
+  create: false
+  
+service:
+  type: NodePort
+  port: 80
+  nodePort: 32000
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+  
+resources: 
+  limits:
+    cpu: 10m
+    memory: 20Mi
+  requests:
+    cpu: 20m
+    memory: 40Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+autoscaling:
+  enabled: false
+
