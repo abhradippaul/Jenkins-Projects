@@ -1,11 +1,5 @@
 pipeline {
     agent {label 'master'}
-    // agent {
-    //     docker {
-    //         image 'node:current-alpine3.22'
-    //         args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-    //     }
-    // }
     
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
@@ -61,7 +55,8 @@ pipeline {
 
         stage('File System Scan') {
             steps {
-                sh "trivy fs --format table -o /data/fs/BoardGame.html ."
+                sh "trivy fs --format table -o ./BoardGamefs.html ."
+                sh "cp BoardGamefs.html /data/fs/BoardGamefs.html"
                 echo 'File System Scan Completed'
             }
         }
@@ -75,6 +70,8 @@ pipeline {
                             --prettyPrint''', odcInstallation: 'owasp'
                 
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+
+                echo "Dependency scan successfully completed"
             }
         }
 
@@ -92,7 +89,8 @@ pipeline {
         stage('Scan Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-docker', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "trivy image --format json --output /data/image/BoardGame.json ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
+                    sh "trivy image --format table -o BoardGameimage.html ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER}"
+                    sh "cp BoardGameimage.html /data/image/BoardGameimage.html"
                 }
                 echo "Scan Docker Image completed."
             }
@@ -111,14 +109,27 @@ pipeline {
             steps {
                 sh "sed -i 's/^  tag: .*/  tag: ${params.BUILD_NUMBER}/' npm_devsecops/manifest/values.yaml"
                 sh "cat npm_devsecops/manifest/values.yaml"
-                // sh "git add java_devsecops/maven-app-chart/values.yaml"
-                // sh "git commit -m 'Change yaml deployment image tag to ${params.BUILD_NUMBER}'"
-                // withCredentials([gitUsernamePassword(credentialsId: 'your-git-credentials-id', gitToolName: 'Default')]){
-                //     sh "git push --set-upstream origin main"
-                // }
+                sh "git add npm_devsecops/manifest/values.yaml"
+                sh "git commit -m 'Change yaml deployment image tag to ${params.BUILD_NUMBER}'"
+                withCredentials([gitUsernamePassword(credentialsId: 'git-credentials-id', gitToolName: 'Default')]){
+                    sh "git push --set-upstream origin main"
+                }
                 echo "Yaml file changes successfully"
             }
         }
 
+
+    }
+
+    post {
+        always {
+            emailext attachLog: true,
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                "URL: ${env.BUILD_URL}<br/>",
+            to: 'abhradipserampore@gmail.com',     
+            attachmentsPattern: 'BoardGamefs.html,BoardGameimage.html,dependency-check-report.html',
+            subject: "'${currentBuild.result} ${DOCKER_IMAGE} ${env.BUILD_NUMBER}'"
+        }
     }
 }
