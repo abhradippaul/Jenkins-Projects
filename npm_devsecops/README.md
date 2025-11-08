@@ -1,13 +1,50 @@
+# Node DevSecOps CI/CD Pipeline with Jenkins
+
+This project demonstrates a complete DevSecOps pipeline built using Jenkins, integrating code compilation, testing, static analysis, dependency check, image scanning, and automated deployment through Kubernetes and ArgoCD.
 
 <img width="1811" height="701" alt="Screenshot 2025-11-09 003347" src="https://github.com/user-attachments/assets/403622e8-2f3b-423d-863f-7bc3fe997db8" />
 
+## Jenkins Plugins Required
+
+Before running the pipeline, make sure these plugins are installed in Jenkins:
+
+- Docker
+- Prometheus
+- SonarQube Scanner
+- Node
+- OWASP
+
+## Prerequisites
+
+Before running the pipeline, ensure the following setups are complete:
+
+- Jenkins is installed and running
+- Docker installed and configured
+- Kubernetes cluster setup and running
+- Helm installed and configured
+- Ngrok needs for local setup
+- Monitoring Jenkins and node with Grafana and Prometheus
+
 ### Ngrok
 
-Create Ngrok container to expose local environment
+Create an Ngrok container to expose the local environment
 
 ```bash
-# Run the docker container
+# Run the Docker container
 docker run -it --rm -e NGROK_AUTHTOKEN=<token> ngrok/ngrok http <server-url>:8080 --url <url>
+```
+Ngrok container will be used to expose the local Jenkins for use with the webhook.
+
+### Jenkins, Node Exporter, Grafana, and Prometheus
+
+Set up Jenkins, Node Exporter, Grafana, and Prometheus using Docker Compose
+
+```bash
+# Go to the java_devsecops folder
+cd Jenkins-Projects/npm_devsecops
+
+# Run Docker Compose to start SonarQube and Nexus
+docker compose up --detach
 ```
 
 ## ArgoCd Deployment
@@ -34,11 +71,12 @@ helm upgrade --install argocd argo/argo-cd \
 -n argo -f argocd-values.yaml
 ```
 
-### ArgoCD secret
+### ArgoCD admin password
 
 ```bash
 # Run this command to get the secret
 kubectl get secret -n argo argocd-initial-admin-secret -ojsonpath={.data.password} | base64 -d
 ```
+Default username: admin
 
-Access the service on port **32001**
+Verify ArgoCD on port **32001**. We need to set up ArgoCD and create a new app that will be triggered when in github a repo change.
