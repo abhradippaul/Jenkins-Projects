@@ -21,10 +21,10 @@ httpRoute:
   enabled: false
   
 resources: 
-  limits:
+  requests:
     cpu: 10m
     memory: 20Mi
-  requests:
+  limits:
     cpu: 20m
     memory: 40Mi
 
