@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: abhradippaul/devsecops
   pullPolicy: IfNotPresent
-  tag: v2
+  tag: v1
 
 
 serviceAccount:
