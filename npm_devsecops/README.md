@@ -2,7 +2,7 @@
 
 This project demonstrates a complete DevSecOps pipeline built using Jenkins, integrating code compilation, testing, static analysis, dependency check, image scanning, and automated deployment through Kubernetes and ArgoCD.
 
-<img width="1811" height="701" alt="Screenshot 2025-11-09 003347" src="https://github.com/user-attachments/assets/403622e8-2f3b-423d-863f-7bc3fe997db8" />
+<img width="1355" height="551" alt="diagram-export-10-11-2025-12_51_10-am" src="https://github.com/user-attachments/assets/79a95b9c-1e83-43af-914c-b14f9426831d" />
 
 ## Jenkins Plugins Required
 
