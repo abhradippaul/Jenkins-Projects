@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'master'}
+    agent { label 'master' }
     
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
@@ -22,29 +22,29 @@ pipeline {
             }
         }
 
-        // stage('Sonarqube Analysis'){
-        //     steps {
-        //         withSonarQubeEnv('sonar-scanner') {
-        //             sh ''' $SCANNER_HOME/bin/sonar-scanner \
-        //             -Dsonar.projectName=React-Frontend \
-        //             -Dsonar.projectKey=React-Frontend \
-        //             -Dsonar.sources=$LOCATION '''
-        //         }
-        //         echo 'SonarQube Analysis Completed'
-        //     }
-        // }
+        stage('Sonarqube Analysis'){
+            steps {
+                withSonarQubeEnv('sonar-scanner') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=React-Frontend \
+                    -Dsonar.projectKey=React-Frontend \
+                    -Dsonar.sources=$LOCATION '''
+                }
+                echo 'SonarQube Analysis Completed'
+            }
+        }
 
-        // stage("Quality Gate") {
-        //     steps {
-        //         script {
-        //             def qg = waitForQualityGate()
-        //             if (qg.status != 'OK') {
-        //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
-        //             }
-        //             echo "Quality gate passed successfully"
-        //         }
-        //     }
-        // }
+        stage("Quality Gate") {
+            steps {
+                script {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                    }
+                    echo "Quality gate passed successfully"
+                }
+            }
+        }
 
         stage('Install Dependecy') {
             steps {
@@ -78,7 +78,6 @@ pipeline {
         stage('Login to DockerHub and Build Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-docker', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "rm -rf $LOCATION/node_modules"
                     sh "docker build -t ${username}/${DOCKER_IMAGE}:${params.BUILD_NUMBER} $LOCATION/"
                     sh "docker login -u ${username} -p ${password}"
                 }

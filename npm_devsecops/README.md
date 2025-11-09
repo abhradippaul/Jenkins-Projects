@@ -11,7 +11,7 @@ Before running the pipeline, make sure these plugins are installed in Jenkins:
 - Docker
 - Prometheus
 - SonarQube Scanner
-- Node
+- NodeJS
 - OWASP
 
 ## Prerequisites
@@ -21,29 +21,19 @@ Before running the pipeline, ensure the following setups are complete:
 - Jenkins is installed and running
 - Docker installed and configured
 - Kubernetes cluster setup and running
+- SonarQube server configured
 - Helm installed and configured
-- Ngrok needs for local setup
 - Monitoring Jenkins and node with Grafana and Prometheus
 
-### Ngrok
+### Jenkins, SonarQube, Node Exporter, Grafana, and Prometheus
 
-Create an Ngrok container to expose the local environment
-
-```bash
-# Run the Docker container
-docker run -it --rm -e NGROK_AUTHTOKEN=<token> ngrok/ngrok http <server-url>:8080 --url <url>
-```
-Ngrok container will be used to expose the local Jenkins for use with the webhook.
-
-### Jenkins, Node Exporter, Grafana, and Prometheus
-
-Set up Jenkins, Node Exporter, Grafana, and Prometheus using Docker Compose
+Set up Jenkins, SonarQube, Node Exporter, Grafana, and Prometheus using Docker Compose
 
 ```bash
 # Go to the java_devsecops folder
 cd Jenkins-Projects/npm_devsecops
 
-# Run Docker Compose to start SonarQube and Nexus
+# Run Docker Compose to start Jenkins, SonarQube, Grafana, Node Exporter, Prometheus, SonarQube
 docker compose up --detach
 ```
 
@@ -77,6 +67,7 @@ helm upgrade --install argocd argo/argo-cd \
 # Run this command to get the secret
 kubectl get secret -n argo argocd-initial-admin-secret -ojsonpath={.data.password} | base64 -d
 ```
+
 Default username: admin
 
 Verify ArgoCD on port **32001**. We need to set up ArgoCD and create a new app that will be triggered when in github a repo change.

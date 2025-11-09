@@ -39,6 +39,11 @@ services:
     depends_on:
       - prometheus
 
+  sonarqube:
+    image: sonarqube
+    ports:
+      - "9000:9000"
+
 volumes:
   jenkins_home:
     driver: local
